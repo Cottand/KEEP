@@ -388,7 +388,54 @@ using a lambda literal (`{autor == expected}` in the example) destructured
 components are also in scope. This is of course not encoded in the type of
 the predicate.
 
-Guards make for very powerful matching, and more possibilities are discussed in the [Component guards](#component-guards) subsection.
+#### Alternative `if`  syntax <a name="if-guards"></a>
+
+The syntax for guards discussed so far focuses in expecting a function, in
+order to easily compose and define custom guards. A possible alternative
+could be the more familiar `if` syntax, which instead uses an
+expression:
+
+``` kotlin
+val expected : String = // ...
+fun movieTitleIsValid(m: Movie) = '%' !in m.title
+
+val result = when(download) {
+  is App(name, Person(author, _)) if (author == expected) -> "$expected's app $name"
+  is Movie(title, Person("Alice", _))
+    if (movieTitleIsValid(download)) -> "Alice's movie $title"
+  is App, Movie -> "Not by $expected"
+}
+```
+ - _Note that indentation and the choice of line breaks are but a suggestion_
+
+Additionally, this could be combined with the already common `else if`
+construct in order to chain guards:
+
+```kotlin
+data class Customer(val name: String, val age: Int, val email: String)
+data class Prospect(val homeAddress: Location, val email: String, active: Boolean)
+// ...
+
+val text = when(elem) {
+  is Customer(name, age, _) 
+    if (age >= 18) -> "Thanks for choosing us, $name!"
+    else -> error("We should not have underage customers")
+  is Prospect(addr, _, _)
+    if (addr in Countries.Spanish) -> "Considere la compra de nuestro producto..."
+    else if (addr in Countries.French) -> "Veulliez considérer l'achat de notre produit"...
+    else -> "Please consider buying our product..."
+}
+```
+
+This is a common idiom in
+[Haskell](https://www.futurelearn.com/courses/functional-programming-haskell/0/steps/27226).
+Additionally, an `else` guard could not be required, as long as the `when`
+expression has an `else` entry (thus preserving exhaustiveness).
+
+<br>
+
+Guards make for very powerful matching, and more possibilities are discussed
+in the [Component guards](#component-guards) subsection.
 
 ## <a name="design"></a> Design decisions
 
