@@ -412,8 +412,9 @@ Additionally, this could be combined with the already common `else if`
 construct in order to chain guards:
 
 ```kotlin
-data class Customer(val name: String, val age: Int, val email: String)
-data class Prospect(val homeAddress: Location, val email: String, active: Boolean)
+sealed class Elem
+data class Customer(val name: String, val age: Int, val email: String) : Elem()
+data class Prospect(val homeAddress: Location, val email: String, active: Boolean) : Elem()
 // ...
 
 val text = when(elem) {
@@ -422,7 +423,7 @@ val text = when(elem) {
     else -> error("We should not have underage customers")
   is Prospect(addr, _, _)
     if (addr in Countries.Spanish) -> "Considere la compra de nuestro producto..."
-    else if (addr in Countries.French) -> "Veulliez considérer l'achat de notre produit"...
+    if (addr in Countries.French) -> "Veulliez considérer l'achat de notre produit"...
     else -> "Please consider buying our product..."
 }
 ```
@@ -522,7 +523,7 @@ val result = when(download) {
 ```kotlin
 val result = when(download) {
   is App(name, is Person("Alice", in 0..18)) -> "Alice's app $name"
-  is Movie(val title, Person("Alice", _)) -> "Alice's movie $title"
+  is Movie(val title, is Person("Alice", _)) -> "Alice's movie $title"
   is App, Movie -> "Not by Alice"
 }
 ```
