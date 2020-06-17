@@ -130,7 +130,8 @@ fun <A> Kind<ForOption, A>.eqK(other: Kind<ForOption, A>, EQ: Eq<A>) =
     when(this.fix() to other.fix()) {
         is (Some(a), Some(b)) -> EQ.run { a.eqv(b) }
         is (None, None) -> true
-        else -> false
+        is (Some, None), is (None, Some) -> false
+        // Note all cases are checked
     }
 
 
@@ -406,7 +407,7 @@ val result = when(download) {
   is App, Movie -> "Not by $expected"
 }
 ```
- - _Note that indentation and the choice of line breaks are but a suggestion_
+  > Note that indentation and the choice of line breaks are merely a suggestion
 
 Additionally, this could be combined with the already common `else if`
 construct in order to chain guards:
@@ -423,15 +424,14 @@ val text = when(elem) {
     else -> error("We should not have underage customers")
   is Prospect(addr, _, _)
     if (addr in Countries.Spanish) -> "Considere la compra de nuestro producto..."
+    // maybe `else if` instead?
     if (addr in Countries.French) -> "Veulliez considérer l'achat de notre produit"...
     else -> "Please consider buying our product..."
 }
 ```
 
 This is a common idiom in
-[Haskell](https://www.futurelearn.com/courses/functional-programming-haskell/0/steps/27226).
-Additionally, an `else` guard could not be required, as long as the `when`
-expression has an `else` entry (thus preserving exhaustiveness).
+[Haskell](https://www.futurelearn.com/courses/functional-programming-haskell/0/steps/27226). While this form of guards may look very similar to a nested `if` expression, note that it is different as an `else` entry is not necessarily required if exhaustiveness is achieved.
 
 <br>
 
@@ -633,7 +633,8 @@ It also allows for some matching on collections or other types that don't destru
 val ls = listOf(1,2,3,4)
 
 when("SomeList" to ls) {
-  is (_, list where Collection::isNotEmpty) -> // ... use list with the sweet relief of knowing it is not empty
+  is (_, list where Collection::isNotEmpty) -> 
+     // ... use list with the sweet relief of knowing it is not empty
 }
 ```
 A user could define their guards like `is Person(name where isLastNameNotHyphenated, _, _)` through named lambdas or function references, for more complex matching. Because the guards are named, they stay readable.
@@ -744,7 +745,7 @@ widely popular.
 
 - Java is considering this (see [JEP 375](https://openjdk.java.net/jeps/375) and [JEP draft 8213076](https://openjdk.java.net/jeps/8213076)). Without guards, but the draft JEP mentions plans to add them in the future
 - [C# supports this](https://docs.microsoft.com/en-us/dotnet/csharp/pattern-matching) with a more verbose syntax through `case` .. `when` ..
-- In [Haskell](https://www.haskell.org/tutorial/patterns.html) pattern matching (along with guards) is a core language feature extensively used to traverse data structures and to define functions, mathcing on their arguments
+- In [Haskell](https://www.haskell.org/tutorial/patterns.html) pattern matching (along with guards) is a core language feature extensively used to traverse data structures and to define functions, matching on their arguments
 - [Rust](https://doc.rust-lang.org/book/ch18-03-pattern-syntax.html) supports pattern matching through `match` expressions
 - [Scala](https://docs.scala-lang.org/tour/pattern-matching.html) supports pattern matching (along with guards)
 - Python does not support pattern matching, but like Kotlin it supports destructuring of tuples and collections, though not classes
@@ -760,3 +761,5 @@ The author has experience with only some of these languages so additional commen
 [JEP 375](https://openjdk.java.net/jeps/375)
 
 [Scala specification on pattern matching](https://www.scala-lang.org/files/archive/spec/2.11/08-pattern-matching.html)
+
+[Haskell.org pattern matching tutorial](https://www.haskell.org/tutorial/patterns.html)
